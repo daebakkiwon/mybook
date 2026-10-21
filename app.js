@@ -1,6 +1,6 @@
 /* 내 사랑하는 책 — 성경·원어·사전·자료 앱 (웹/PWA·Electron 공통) */
 'use strict';
-const BUILD = '2026.10.21-1410';
+const BUILD = '2026.10.21-1427';
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -818,7 +818,7 @@ function viewAbout() {
    ${META.versions.map(v => `<div class="li"><span class="t"><b>${esc(v.name)}</b><span style="white-space:normal">${esc(v.note)}</span></span></div>`).join('')}
    ${META.libs.map(l => `<div class="li"><span class="t"><b>${esc(l.name)}</b><span style="white-space:normal">${esc(l.desc)} · ${l.count.toLocaleString()}편 · 내사랑하는책 원본 자료</span></span></div>`).join('')}
    <div class="li"><span class="t"><b>스트롱 사전 · 관주 · 주제별 성구 · 일독표 · 오늘의 말씀</b><span style="white-space:normal">내사랑하는책 원본 자료</span></span></div></div>
-   <div class="card small muted" style="line-height:1.7">원어 본문은 원본의 옛 글꼴 코드를 유니코드로 바꾸었고, 원본에서 빠진 일부 모음은 Westminster Leningrad Codex 와 맞추어 채웠습니다. 공개 번역본은 scrollmapper/bible_databases(CrossWire SWORD 모듈) 자료를 썼습니다. 원본 자료의 권리는 각 저작권자에게 있습니다.</div></div>`;
+   <div class="card small muted" style="line-height:1.7">원어 본문은 원본의 옛 글꼴 코드를 유니코드로 바꾸었고, 원본에서 빠진 일부 모음은 Westminster Leningrad Codex 와 맞추어 채웠습니다. 공개 번역본은 scrollmapper/bible_databases(CrossWire SWORD 모듈) 자료를 썼습니다. 스트롱 사전의 원어 표제어는 Open Scriptures Strong's 사전(CC-BY-SA)을 썼습니다. 원본 자료의 권리는 각 저작권자에게 있습니다.</div></div>`;
 }
 
 /* ---------- 설치 ---------- */

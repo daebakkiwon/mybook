@@ -1,5 +1,5 @@
 /* 내 사랑하는 책 — 오프라인 저장. 앱 틀은 판마다, 자료는 자료판(DV)마다 따로 담는다. */
-const V = '2026.10.21-1410', DV = 'fb701534df';
+const V = '2026.10.21-1427', DV = 'd90ad91786';
 const SHELL = 'mybook-shell-' + V, DATA = 'mybook-data-' + DV;
 const ASSETS = ['./', 'index.html', 'style.css?v=' + V, 'app.js?v=' + V, 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'data/meta.json'];
