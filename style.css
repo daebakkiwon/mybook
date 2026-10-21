@@ -83,6 +83,7 @@ mark{background:var(--hl-y);color:inherit;border-radius:3px;padding:0 1px}
 .chap{max-width:780px;margin:0 auto;padding:10px 18px 30px}
 .chap h2{font-family:var(--krs);font-size:calc(var(--fs) * 1.25);text-align:center;margin:18px 0 14px;font-weight:700}
 .v{position:relative;font-size:var(--fs);line-height:var(--lh);padding:3px 6px 3px 0;border-radius:8px;margin:0 -6px;padding-left:6px;cursor:pointer;font-family:var(--krs)}
+.hd{font-family:var(--kr);font-weight:700;font-size:calc(var(--fs) * .8);color:var(--acc);margin:18px 0 4px}
 .v .vn{color:var(--acc);font-size:.62em;font-weight:700;vertical-align:.35em;margin-right:5px;font-family:var(--kr)}
 .v.sel{background:var(--sel)}
 .v.hy .t{background:var(--hl-y)} .v.hg .t{background:var(--hl-g)} .v.hb .t{background:var(--hl-b)} .v.hp .t{background:var(--hl-p)}

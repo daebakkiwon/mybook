@@ -1,6 +1,6 @@
 /* 내 사랑하는 책 — 성경·원어·사전·자료 앱 (웹/PWA·Electron 공통) */
 'use strict';
-const BUILD = '2026.10.21-1427';
+const BUILD = '2026.10.22-0734';
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -46,8 +46,29 @@ function toast(msg, ms = 2200) {
 
 /* ---------- 자료 읽기 ---------- */
 const CACHE = new Map();
+/* 내 역본: 사용자가 가진 성경 파일을 이 기기(IndexedDB)에만 저장한다. 웹에는 올라가지 않는다. */
+const PV = {
+  db: null,
+  open() {
+    if (this.db) return this.db;
+    return this.db = new Promise((ok, no) => {
+      const r = indexedDB.open('mybook', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('vers');
+      r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error);
+    });
+  },
+  async tx(mode, f) { const db = await this.open(); return new Promise((ok, no) => { const t = db.transaction('vers', mode); const q = f(t.objectStore('vers')); t.oncomplete = () => ok(q && q.result); t.onerror = () => no(t.error); }); },
+  get(id) { return this.tx('readonly', st => st.get(id)); },
+  put(id, v) { return this.tx('readwrite', st => st.put(v, id)); },
+  del(id) { return this.tx('readwrite', st => st.delete(id)); },
+};
 function J(p) {
   if (CACHE.has(p)) return CACHE.get(p);
+  const pm = /^(bible|heads)\/(.+)\.json$/.exec(p);
+  if (pm && VER[pm[2]] && VER[pm[2]].personal) {
+    const pr = PV.get(pm[2]).then(d => { if (!d) throw new Error('내 역본 자료가 이 기기에 없습니다'); return pm[1] === 'bible' ? d.books : (d.heads || {}); });
+    CACHE.set(p, pr); pr.catch(() => CACHE.delete(p)); return pr;
+  }
   const pr = fetch(dpath(p)).then(r => { if (!r.ok) throw new Error(p + ' ' + r.status); return r.json(); });
   CACHE.set(p, pr); pr.catch(() => CACHE.delete(p));
   return pr;
@@ -190,6 +211,7 @@ async function viewRead(b, c, flashV) {
   $('#pv').onclick = () => step(-1); $('#nx').onclick = () => step(1);
   if (!RD || !vers.every(id => CACHE.has('bible/' + id + '.json'))) main.innerHTML = loadingHTML('성경 본문을 불러오는 중…');
   const data = await Promise.all(vers.map(id => J('bible/' + id + '.json')));
+  const heads = VER[vers[0]].personal ? ((await J('heads/' + vers[0] + '.json'))[b] || {}) : {};
   RD = { b, c, vers, data };
   S.pos = { b, c }; addHist(b, c); save();
   const n = BK[b].vc[c - 1];
@@ -200,6 +222,7 @@ async function viewRead(b, c, flashV) {
     const m = S.marks[mkey(b, c, v)] || {};
     const cls = 'v' + (par ? ' par' : '') + (m.h ? ' h' + m.h : '') + (SEL.has(v) ? ' sel' : '');
     const marks = (m.bm ? '<span class="mk" title="책갈피">🔖</span>' : '') + (m.note ? '<span class="mk" title="메모">📝</span>' : '');
+    if (heads[c + ':' + v]) h += `<div class="hd">${esc(heads[c + ':' + v])}</div>`;
     h += `<div class="${cls}" data-v="${v}" id="v${v}"><span class="vn">${S.vn ? v : ''}</span>`;
     if (!par) {
       const id = vers[0], t = (data[0][b][c - 1] || [])[v - 1] || '';
@@ -772,6 +795,9 @@ function viewSettings() {
     <p class="v" style="margin-top:10px;cursor:default"><span class="vn">16</span><span class="t">하나님이 세상을 이처럼 사랑하사 독생자를 주셨으니 이는 저를 믿는 자마다 멸망치 않고 영생을 얻게 하려 하심이니라</span></p></div>
    ${canOffline ? `<h2 class="sec">오프라인 저장</h2><div class="card"><p class="small" style="margin-top:0">한 번 연 자료는 저절로 기기에 저장됩니다. 인터넷이 없는 곳에서도 모두 보려면 전체 자료(약 ${Math.round(META.bytes / 1e6)}MB, 실제 내려받는 양은 그보다 적음)를 미리 받아 두세요.</p>
      <button class="btn pri" id="dlAll">전체 자료 받기</button> <span id="dlS" class="small muted"></span></div>` : ''}
+   <h2 class="sec">내 역본 (이 기기에만 저장)</h2><div class="card"><p class="small" style="margin-top:0">개역개정처럼 저작권 때문에 앱에 넣을 수 없는 성경을, 가지고 계신 파일(<b>…_내사랑하는책.json</b>)에서 불러와 이 기기에서만 봅니다. 인터넷에는 올라가지 않으며, 기기마다 한 번씩 불러오면 됩니다.</p>
+     <div id="pvl">${(S.pver || []).map(v => `<div class="kv"><span><b>${esc(v.name)}</b> <span class="small muted">${esc(v.note || '')}</span></span><button class="btn" data-pvdel="${esc(v.id)}">지우기</button></div>`).join('')}</div>
+     <label class="btn pri" style="display:inline-block;margin-top:8px">역본 파일 불러오기<input type="file" id="pvIn" accept=".json,application/json" hidden></label> <span id="pvS" class="small muted"></span></div>
    <h2 class="sec">백업</h2><div class="card"><p class="small" style="margin-top:0">책갈피·형광펜·메모·읽기표 기록을 파일로 옮겨 다른 기기(휴대폰↔PC)에서 불러올 수 있습니다.</p>
      <div class="row"><button class="btn" id="bkOut">백업 파일 만들기</button><label class="btn">백업 불러오기<input type="file" id="bkIn" accept=".json,application/json" hidden></label></div></div>
    <h2 class="sec">초기화</h2><div class="card"><button class="btn" id="rst" style="color:var(--warn)">내 기록 모두 지우기</button></div></div>`;
@@ -781,6 +807,30 @@ function viewSettings() {
   $('#th').onclick = e => { const b = e.target.closest('button'); if (!b) return; S.theme = b.dataset.k; $$('#th button').forEach(x => x.classList.toggle('on', x === b)); live(); };
   $('#vn').onchange = e => { S.vn = e.target.checked; save(); };
   if ($('#dlAll')) $('#dlAll').onclick = downloadAll;
+  $('#pvIn').onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    const st = $('#pvS'); st.textContent = '불러오는 중…';
+    try {
+      const d = JSON.parse(await f.text());
+      if (d.app !== 'mybook' || d.kind !== 'version' || !Array.isArray(d.books) || d.books.length !== 66) throw new Error('역본 파일이 아닙니다');
+      const id = 'my_' + String(d.id || 'v').replace(/[^\w]/g, '');
+      if (META.versions.some(v => v.id === id && !v.personal)) throw new Error('같은 이름의 역본이 이미 있습니다');
+      await PV.put(id, { books: d.books, heads: d.heads || {} });
+      const v = { id, name: d.name || id, short: d.short || d.name || id, lang: d.lang || 'ko', note: d.note || '내 기기에만 저장된 역본', personal: true };
+      S.pver = [...(S.pver || []).filter(x => x.id !== id), v];
+      if (!VER[id]) META.versions.push(v); VER[id] = Object.assign(VER[id] || {}, v);
+      CACHE.delete('bible/' + id + '.json'); CACHE.delete('heads/' + id + '.json');
+      S.ver = id; save();
+      if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
+      toast(`${v.name}을(를) 불러왔습니다. 본문 역본으로 정했습니다.`); viewSettings();
+    } catch (err) { st.textContent = '불러오지 못했습니다: ' + err.message; }
+  };
+  $$('[data-pvdel]').forEach(b => b.onclick = async () => {
+    const id = b.dataset.pvdel; if (!confirm('이 기기에서 이 역본을 지울까요? (파일을 다시 불러오면 됩니다)')) return;
+    await PV.del(id).catch(() => { });
+    S.pver = (S.pver || []).filter(x => x.id !== id); S.par = S.par.filter(x => x !== id); if (S.ver === id) S.ver = 'krv';
+    META.versions = META.versions.filter(v => v.id !== id); delete VER[id]; save(); viewSettings();
+  });
   $('#bkOut').onclick = () => {
     const blob = new Blob([JSON.stringify({ app: 'mybook', at: new Date().toISOString(), marks: S.marks, plan: S.plan }, null, 1)], { type: 'application/json' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `내사랑하는책_백업_${new Date().toISOString().slice(0, 10)}.json`; a.click();
@@ -845,6 +895,7 @@ async function start() {
   try { META = await J('meta.json'); }
   catch (e) { main.innerHTML = `<div class="wrap"><div class="card">자료 목록을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.<br><button class="btn pri" onclick="location.reload()">다시 시도</button></div></div>`; return; }
   BK = META.books; META.versions.forEach(v => VER[v.id] = v); META.libs.forEach(l => LIB[l.id] = l);
+  for (const v of S.pver || []) if (!VER[v.id]) { VER[v.id] = v; META.versions.push(v); }
   if (!VER[S.ver]) S.ver = 'krv';
   S.par = S.par.filter(x => VER[x]);
   initRefs();
