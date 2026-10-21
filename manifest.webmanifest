@@ -1,0 +1,16 @@
+{
+  "name": "내 사랑하는 책",
+  "short_name": "내사랑하는책",
+  "description": "성경·원어·스트롱사전·관주·성경사전·예화·설교자료·찬송가",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f4ec",
+  "theme_color": "#2f5d46",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

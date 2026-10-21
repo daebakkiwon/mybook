@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>내 사랑하는 책</title>
+<meta name="description" content="성경·원어·스트롱사전·관주·성경사전·예화·설교자료·찬송가를 한 곳에서">
+<meta name="theme-color" content="#2f5d46">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="내사랑하는책">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="style.css?v=2026.10.21-1410">
+</head>
+<body>
+<div id="app">
+  <nav id="side" aria-label="주 메뉴"></nav>
+  <div id="mainwrap">
+    <header id="top"></header>
+    <main id="main" tabindex="-1"></main>
+  </div>
+  <aside id="panel" aria-label="보조 창" hidden>
+    <div class="ph"><button class="ib" id="pBack" aria-label="뒤로" hidden><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h2 id="pTitle"></h2><button class="ib" id="pClose" aria-label="닫기"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div id="pBody"></div>
+  </aside>
+</div>
+<nav id="tabs" aria-label="아래 메뉴"></nav>
+<div id="selbar" hidden></div>
+<div id="ov" hidden></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="app.js?v=2026.10.21-1410"></script>
+</body>
+</html>
